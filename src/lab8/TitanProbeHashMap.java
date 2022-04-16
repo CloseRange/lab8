@@ -17,47 +17,26 @@ public class TitanProbeHashMap<K, V> extends LinearProbingHashTable<K, V> {
      * @return the average search miss cost
      */
     public double empiricalAverageSearchMissCost() {
-        int misses = tableSize;  // total miss cost
-        int k = 0;               // running total
+        int misses = 0;
         for(int i=0; i<tableSize; i++) {
-            if(keys[i] == null) k = 0;
-            else misses += (++k);
+            misses += getCost(i);
         }
         return (double) misses / tableSize;
     }
     /**
-     * Uses a single for loop to caclulate the emperical average search miss cost.
+     * Uses a string to caclulate the emperical average search miss cost.
      * 
-     * NOTE: could be worth just creating a dummy map filled with the char values and returning
-     * the base AverageSearchMissCost of it, however that is less efficient.
      * @param str the string to get the values of
      * @return the average search miss cost
      */
     public static double empiricalAverageSearchMissCost(String str) {
-        int misses = str.length();  // total miss cost
-        int k = 0;                  // running total
+        TitanProbeHashMap<Integer, Character> newMap = new TitanProbeHashMap<>(str.length());
         for(int i=0; i<str.length(); i++) {
-            if(str.charAt(i) == EMPTY) k = 0;
-            else misses += (++k);
+            char c = str.charAt(i);
+            if(c == FILLED) newMap.put(i, c);
         }
-        return (double) misses / str.length();
-    }
-    public double _empiricalAverageSearchMissCost() {
-        double totalMissCost = 0;
 
-        for (int i = 0; i < tableSize; i++) {
-            if (keys[i] == null) {
-                totalMissCost++;
-            } else {
-                int j = 0;
-                while (keys[(i + j) % tableSize] != null && j != tableSize) {
-                    totalMissCost++;
-                    j++;
-                }
-                totalMissCost++;
-            }
-        }
-        return totalMissCost / tableSize;
+        return newMap.empiricalAverageSearchMissCost();
     }
 
     @Override
@@ -74,6 +53,17 @@ public class TitanProbeHashMap<K, V> extends LinearProbingHashTable<K, V> {
         return sb.toString();
     }
     
+    /**
+     * Gets the miss cost of any position
+     * @param index the index to get the cost of
+     * @return the actual cost
+     */
+    private int getCost(int index) {
+        for(int i=0; i<tableSize; i++) {
+            if(keys[(i + index) % tableSize] == null) return i + 1;
+        }
+        return size;
+    }
     
 
 }
